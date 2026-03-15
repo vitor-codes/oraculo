@@ -20,41 +20,68 @@ def carregar_site(url):
             loader = WebBaseLoader(url, raise_for_status=True)
             docs = loader.load()
             documento = "\n\n".join([doc.page_content for doc in docs])
-            print(documento)
             break
-        except:
+        except Exception as e:
             sleep(2)
 
     if not documento:
-        st.error("Não foi possível carregar o site")
+        st.error("Não foi possível carregar o site. Verifique a URL e tente novamente.")
         st.stop()
 
     return documento
 
 
 def carregar_youtube(url):
-    loader = YoutubeLoader.from_youtube_url(
-        url,
-        add_video_info=False,
-        language=["pt"]
-    )
-    docs = loader.load()
-    return "\n\n".join([doc.page_content for doc in docs])
+    try:
+        loader = YoutubeLoader.from_youtube_url(
+            url,
+            add_video_info=False,
+            language=["pt", "en"]
+        )
+        docs = loader.load()
+        if not docs:
+            st.error("Nenhuma transcrição encontrada para este vídeo.")
+            st.stop()
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception as e:
+        st.error(f"Erro ao carregar vídeo do YouTube: {e}")
+        st.stop()
 
 
 def carregar_pdf(path):
-    loader = PyPDFLoader(path)
-    docs = loader.load()
-    return "\n\n".join([doc.page_content for doc in docs])
+    try:
+        loader = PyPDFLoader(path)
+        docs = loader.load()
+        if not docs:
+            st.error("Não foi possível extrair conteúdo do PDF.")
+            st.stop()
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception as e:
+        st.error(f"Erro ao carregar PDF: {e}")
+        st.stop()
 
 
 def carregar_csv(path):
-    loader = CSVLoader(path)
-    docs = loader.load()
-    return "\n\n".join([doc.page_content for doc in docs])
+    try:
+        loader = CSVLoader(path)
+        docs = loader.load()
+        if not docs:
+            st.error("Não foi possível extrair conteúdo do CSV.")
+            st.stop()
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception as e:
+        st.error(f"Erro ao carregar CSV: {e}")
+        st.stop()
 
 
 def carregar_txt(path):
-    loader = TextLoader(path)
-    docs = loader.load()
-    return "\n\n".join([doc.page_content for doc in docs])
+    try:
+        loader = TextLoader(path)
+        docs = loader.load()
+        if not docs:
+            st.error("Não foi possível extrair conteúdo do arquivo TXT.")
+            st.stop()
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception as e:
+        st.error(f"Erro ao carregar TXT: {e}")
+        st.stop()

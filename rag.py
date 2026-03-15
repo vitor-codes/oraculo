@@ -1,5 +1,6 @@
 import streamlit as st
 import tempfile
+import os
 
 from loaders import (
     carregar_site,
@@ -25,14 +26,18 @@ def carregar_arquivo(tipo, arquivo):
         temp.write(arquivo.read())
         path = temp.name
 
-    if tipo == "PDF":
-        return carregar_pdf(path)
+    try:
+        if tipo == "PDF":
+            return carregar_pdf(path)
 
-    if tipo == "Csv":
-        return carregar_csv(path)
+        if tipo == "Csv":
+            return carregar_csv(path)
 
-    if tipo == "Txt":
-        return carregar_txt(path)
+        if tipo == "Txt":
+            return carregar_txt(path)
+    finally:
+        if os.path.exists(path):
+            os.unlink(path)
 
 
 def formatar_historico(history):
