@@ -1,6 +1,6 @@
-# 🤖 Oráculo RAG
+# RAG com memória vetorial
 
-Oráculo é uma aplicação web interativa construída com Streamlit que implementa RAG (Retrieval-Augmented Generation) com memória vetorial. Permite conversar com modelos de IA (OpenAI e Groq) sobre diferentes tipos de documentos usando busca semântica para recuperar informações relevantes.
+Aplicação web interativa construída com Streamlit que implementa RAG (Retrieval-Augmented Generation) com memória vetorial. Permite conversar com modelos OpenAI sobre diferentes tipos de documentos usando busca semântica para recuperar informações relevantes.
 
 ## ✨ Funcionalidades
 
@@ -12,14 +12,13 @@ Oráculo é uma aplicação web interativa construída com Streamlit que impleme
 
 - **Múltiplos tipos de documentos suportados:**
   - 📄 Sites (URLs)
-  - 🎥 Vídeos do YouTube
   - 📑 Arquivos PDF
   - 📊 Arquivos CSV
   - 📝 Arquivos de texto (TXT)
 
-- **Múltiplos provedores de IA:**
-  - OpenAI (GPT-4o, GPT-4o-mini)
-  - Groq (Llama 3.1 70B, Mixtral 8x7B)
+- **OpenAI:**
+  - Modelos de chat GPT-4o e GPT-4o-mini
+  - Embeddings e chave de API via arquivo `.env` (`OPENAI_API_KEY`)
 
 - **Interface intuitiva:**
   - Chat interativo com histórico de conversas (últimos 4 turnos)
@@ -31,9 +30,7 @@ Oráculo é uma aplicação web interativa construída com Streamlit que impleme
 ## 📋 Pré-requisitos
 
 - Python 3.8 ou superior
-- API Keys:
-  - OpenAI API Key (para modelos OpenAI e embeddings)
-  - Groq API Key (para modelos Groq)
+- OpenAI API Key (chat e embeddings), definida no arquivo `.env` como `OPENAI_API_KEY=...`
 
 ## 🚀 Instalação
 
@@ -55,7 +52,6 @@ O projeto utiliza as seguintes bibliotecas principais:
 - `streamlit` - Framework para aplicações web
 - `langchain` - Framework para aplicações com LLMs
 - `langchain-community` - Loaders de documentos da comunidade
-- `langchain-groq` - Integração com Groq
 - `langchain-openai` - Integração com OpenAI e embeddings
 - `chromadb` - Banco de dados vetorial (via langchain-community)
 - `fake_useragent` - Geração de User-Agents aleatórios
@@ -71,25 +67,27 @@ O projeto utiliza as seguintes bibliotecas principais:
 streamlit run app.py
 ```
 
-2. **Configure o Oráculo:**
-   - Na sidebar, selecione o tipo de arquivo (Site, Youtube, PDF, Csv ou Txt)
-   - Se for Site ou Youtube, forneça a URL
+2. **Crie o arquivo `.env` na raiz do projeto** com sua chave:
+   ```
+   OPENAI_API_KEY=sua_chave_aqui
+   ```
+3. **Configure o RAG com memória vetorial:**
+   - Na sidebar, selecione o tipo de arquivo (Site, PDF, Csv ou Txt)
+   - Se for Site, forneça a URL
    - Se for PDF, CSV ou TXT, faça upload do arquivo
-   - Selecione o provedor (OpenAI ou Groq)
-   - Escolha o modelo desejado
-   - Insira sua OpenAI API Key (necessária para embeddings, mesmo usando Groq)
-   - Clique em "🚀 Inicializar Oráculo"
+   - Escolha o modelo OpenAI desejado
+   - Clique em "🚀 Inicializar RAG com memória vetorial"
 
-3. **Comece a conversar:**
+4. **Comece a conversar:**
    - Digite suas perguntas no campo de chat
-   - O Oráculo buscará informações relevantes no documento usando busca semântica
+   - O sistema buscará informações relevantes no documento usando busca semântica
    - A resposta será gerada com base no contexto recuperado
    - Use "🧹 Limpar Histórico" para resetar o histórico de conversas
    - Use "🗑️ Remover Sessão" para remover a sessão e os vetores armazenados
 
 ## 🏗️ Arquitetura RAG
 
-O Oráculo implementa RAG (Retrieval-Augmented Generation) da seguinte forma:
+O projeto implementa RAG (Retrieval-Augmented Generation) da seguinte forma:
 
 1. **Carregamento de Documentos:** Os documentos são carregados usando loaders específicos
 2. **Divisão em Chunks:** O texto é dividido em chunks de 2000 caracteres com overlap de 500
@@ -101,7 +99,7 @@ O Oráculo implementa RAG (Retrieval-Augmented Generation) da seguinte forma:
 ## 📁 Estrutura do Projeto
 
 ```
-oraculo/
+RAG/
 ├── app.py              # Aplicação principal Streamlit
 ├── rag.py              # Lógica RAG (inicialização e geração de respostas)
 ├── config.py           # Configurações (modelos, tipos de arquivos)
@@ -117,13 +115,13 @@ oraculo/
 ### `app.py`
 Aplicação principal que contém:
 - Interface Streamlit
-- Gerenciamento de estado (histórico de chat, oráculo)
+- Gerenciamento de estado (histórico de chat, retriever/LLM)
 - Inicialização de modelos de IA
 - Interface de chat interativa com streaming
 
 ### `rag.py`
 Módulo com a lógica RAG:
-- `inicializar_oraculo()` - Carrega documento, cria vectorstore e inicializa o oráculo
+- `inicializar_oraculo()` - Carrega documento, cria vectorstore e prepara o RAG na sessão
 - `stream_resposta()` - Gera respostas usando RAG com streaming
 - `formatar_historico()` - Formata o histórico de conversas (últimos 4 turnos)
 - `carregar_arquivo()` - Roteia para o loader apropriado
@@ -131,13 +129,12 @@ Módulo com a lógica RAG:
 ### `config.py`
 Configurações centralizadas:
 - Tipos de arquivos suportados
-- Modelos disponíveis por provedor
+- Lista de modelos OpenAI e leitura de `OPENAI_API_KEY` do `.env`
 - Limite de histórico de conversas
 
 ### `loaders.py`
 Módulo com funções para carregar diferentes tipos de documentos:
 - `carregar_site()` - Carrega conteúdo de URLs (com retry e User-Agents aleatórios)
-- `carregar_youtube()` - Extrai transcrições de vídeos do YouTube
 - `carregar_pdf()` - Processa arquivos PDF
 - `carregar_csv()` - Processa arquivos CSV
 - `carregar_txt()` - Processa arquivos de texto
@@ -156,15 +153,9 @@ Gerenciamento de sessões:
 ### Carregar um site
 1. Selecione "Site" como tipo de arquivo
 2. Digite a URL: `https://exemplo.com`
-3. Configure o modelo e API Key
-4. Inicialize o Oráculo
+3. Configure o modelo OpenAI
+4. Inicialize o RAG com memória vetorial (chave no `.env`)
 5. Faça perguntas sobre o conteúdo do site
-
-### Carregar um vídeo do YouTube
-1. Selecione "Youtube" como tipo de arquivo
-2. Digite a URL do vídeo
-3. O Oráculo extrairá a transcrição automaticamente
-4. Faça perguntas sobre o conteúdo do vídeo
 
 ### Carregar um PDF
 1. Selecione "PDF" como tipo de arquivo
@@ -174,15 +165,11 @@ Gerenciamento de sessões:
 
 ## ⚙️ Configuração
 
-O Oráculo suporta os seguintes modelos:
+O app suporta os seguintes modelos:
 
-**OpenAI:**
+**OpenAI (chat e embeddings):**
 - `gpt-4o-mini`
 - `gpt-4o`
-
-**Groq:**
-- `llama-3.1-70b-versatile`
-- `mixtral-8x7b-32768`
 
 **Embeddings:**
 - OpenAI Embeddings (usado para todos os casos)
@@ -195,22 +182,22 @@ O Oráculo suporta os seguintes modelos:
 
 ## 🔒 Segurança
 
-- As API Keys são inseridas como campos de senha (não são exibidas)
+- A chave OpenAI fica no arquivo `.env` (não versionado no git); não a compartilhe
 - Arquivos temporários são criados durante o processamento e podem ser limpos após o uso
 - Sessões são isoladas por ID único
 - Vetores são armazenados localmente no diretório `chromadb/`
 
 ## 🐛 Solução de Problemas
 
-- **Erro ao carregar site:** O Oráculo tenta carregar o site até 5 vezes com User-Agents aleatórios. Se falhar, verifique se a URL está correta e acessível.
-- **Erro de API Key:** Certifique-se de que a OpenAI API Key está correta (necessária para embeddings). A Groq API Key só é necessária se estiver usando modelos Groq.
+- **Erro ao carregar site:** O carregador tenta obter o site até 5 vezes com User-Agents aleatórios. Se falhar, verifique se a URL está correta e acessível.
+- **Erro de API Key:** Confira se `OPENAI_API_KEY` está definida no `.env` na pasta do projeto e se a chave é válida na OpenAI.
 - **Memória insuficiente:** Para documentos muito grandes, considere dividir em partes menores.
 - **Sessão não removida:** Use o botão "🗑️ Remover Sessão" para limpar os vetores armazenados.
 
 ## 📝 Notas
 
 - O histórico de conversas mantém os últimos 4 turnos para contexto
-- Cada inicialização do Oráculo cria uma nova sessão e limpa o histórico anterior
+- Cada nova inicialização do RAG cria uma nova sessão de índice e histórico de chat associado
 - Os vetores são persistidos no diretório `chromadb/` (não versionado no git)
 - O sistema usa streaming para respostas em tempo real
 

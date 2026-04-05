@@ -3,7 +3,6 @@ langchain
 langchain-community
 langchain-chroma
 langchain-text-splitters
-langchain-groq
 langchain-openai
 python-dotenv
 bs4  

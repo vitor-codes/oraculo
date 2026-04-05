@@ -1,9 +1,8 @@
 from langchain_community.document_loaders import (
     WebBaseLoader,
-    YoutubeLoader,
     PyPDFLoader,
     CSVLoader,
-    TextLoader
+    TextLoader,
 )
 
 import os
@@ -29,23 +28,6 @@ def carregar_site(url):
         st.stop()
 
     return documento
-
-
-def carregar_youtube(url):
-    try:
-        loader = YoutubeLoader.from_youtube_url(
-            url,
-            add_video_info=False,
-            language=["pt", "en"]
-        )
-        docs = loader.load()
-        if not docs:
-            st.error("Nenhuma transcrição encontrada para este vídeo.")
-            st.stop()
-        return "\n\n".join([doc.page_content for doc in docs])
-    except Exception as e:
-        st.error(f"Erro ao carregar vídeo do YouTube: {e}")
-        st.stop()
 
 
 def carregar_pdf(path):

@@ -41,6 +41,9 @@ ENV/
 # Streamlit
 .streamlit/secrets.toml
 
+# Segredos locais
+.env
+
 # Arquivos temporários
 *.tmp
 *.temp

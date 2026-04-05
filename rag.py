@@ -4,23 +4,21 @@ import os
 
 from loaders import (
     carregar_site,
-    carregar_youtube,
     carregar_pdf,
     carregar_csv,
-    carregar_txt
+    carregar_txt,
 )
 
+from langchain_openai import ChatOpenAI
+
 from vectorstore import criar_vectorstore
-from config import MODELOS, MAX_HISTORICO
+from config import MAX_HISTORICO, openai_api_key
 from session import criar_sessao
 
 
 def carregar_arquivo(tipo, arquivo):
     if tipo == "Site":
         return carregar_site(arquivo)
-
-    if tipo == "Youtube":
-        return carregar_youtube(arquivo)
 
     with tempfile.NamedTemporaryFile(delete=False) as temp:
         temp.write(arquivo.read())
@@ -51,25 +49,25 @@ def formatar_historico(history):
     return texto #retorna o texto formatado
 
 
-def inicializar_oraculo(provedor, modelo, api_key, tipo, arquivo): #inicializa o oráculo
-    persist_dir = criar_sessao() #cria uma sessão
-    documento = carregar_arquivo(tipo, arquivo) #carrega o arquivo
+def inicializar_oraculo(modelo, tipo, arquivo):
+    api_key = openai_api_key()
+    if not api_key:
+        st.error("Defina OPENAI_API_KEY no arquivo .env na pasta do projeto.")
+        st.stop()
+
+    persist_dir = criar_sessao()
+    documento = carregar_arquivo(tipo, arquivo)
 
     vectordb = criar_vectorstore(
         documento=documento,
         api_key=api_key,
-        persist_dir=persist_dir
+        persist_dir=persist_dir,
     )
 
-    retriever = vectordb.as_retriever(search_kwargs={"k": 8}) #busca os chunks mais relevantes/semelhantes
+    retriever = vectordb.as_retriever(search_kwargs={"k": 8})
 
-    # cria o modelo
-    llm = MODELOS[provedor]["chat"](
-        model=modelo,
-        api_key=api_key,
-        streaming=True
-    )
-    # salva o oráculo na sessão
+    llm = ChatOpenAI(model=modelo, api_key=api_key, streaming=True)
+    # estado do RAG (retriever + LLM) na sessão Streamlit
     st.session_state.oraculo = {
         "retriever": retriever,
         "llm": llm,
@@ -89,7 +87,7 @@ def stream_resposta(oraculo, pergunta): #gera a resposta
     historico = formatar_historico(st.session_state.history) #formata o histórico
 
     prompt = f"""
-Você é um assistente chamado Oráculo.
+Você é o assistente de um sistema RAG com memória vetorial.
 
 Histórico recente da conversa:
 {historico}

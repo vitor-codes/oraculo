@@ -12,12 +12,11 @@ dependencies = [
     "langchain-chroma>=0.2.2",
     "langchain-community>=0.4.1",
     "langchain-core>=1.2.6",
-    "langchain-groq>=1.1.1",
     "langchain-openai>=1.1.6",
+    "python-dotenv>=1.0.0",
     "langgraph>=1.0.5",
     "playwright>=1.57.0",
     "streamlit>=1.52.2",
     "tiktoken>=0.12.0",
     "unstructured>=0.18.24",
-    "youtube-transcript-api>=1.2.3",
 ]
